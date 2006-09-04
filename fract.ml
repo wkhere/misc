@@ -9,7 +9,8 @@ let vis () =
 ;;
 
 let forceOpen () =
-  if not (vis ()) then G.open_graph ":0"
+  if not (vis ()) then G.open_graph 
+    (try Sys.getenv "DISPLAY" with Not_found -> ":0")
 and forceClose () =
   if vis () then G.close_graph () ;;
 
