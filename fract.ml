@@ -23,7 +23,7 @@ let colorTab = [20, G.white;
 		min_int, G.blue;
 	       ];;
 
-type mandelity = InSet | Escape of int;;
+type fractality = InSet | Escape of int;;
 
 let goMandelC maxit (x0,y0) = 
   let c0 = {C.re=x0; C.im=y0} in 
@@ -75,18 +75,22 @@ let goMandelF''' maxit (x0,y0) =
 	    fMandel x' y' (succ i)
   in fMandel x0 y0 0;;
 
-let rectMandel mandelFun (x0,y0) (x1,y1) xp yp =
+let fractDrawPix (fractRes : fractality) (xi, yi) =
+  let color = match fractRes with
+    | InSet -> G.black
+    | Escape i -> snd (List.find (fun c -> i >= fst c) colorTab)
+  in G.set_color color; G.plot xi yi ;;	    
+
+let rectFractal processCoordsFun (x0,y0) (x1,y1) xp yp =
   let dx = (x1 -. x0) /. float_of_int xp 
   and dy = (y1 -. y0) /. float_of_int yp in
   let rec iterX x xi =
     if xi < xp then 
       let rec iterY y yi = 
-	if yi < yp then
-	  let color = match mandelFun (x,y) with
-	    | InSet -> G.black
-	    | Escape i -> snd (List.find (fun c -> i >= fst c) colorTab)
-	  in G.set_color color; G.plot xi yi;
+	if yi < yp then begin
+	    processCoordsFun (x,y) (xi,yi);
 	    iterY (y +. dy) (succ yi)
+	  end
       in iterY y0 0;
 	iterX (x +. dx) (succ xi)
   in iterX x0 0 ;;
@@ -94,7 +98,7 @@ let rectMandel mandelFun (x0,y0) (x1,y1) xp yp =
 (* Imperative version is usually a bit faster with bytecode 
    and sometimes a bit slower with native G4 code. 
    It also depends on a cpu cache (?) *)
-let rectMandelI mandelFun (x0,y0) (x1,y1) xp yp =
+let rectFractalI processCoordsFun (x0,y0) (x1,y1) xp yp =
   let dx = (x1 -. x0) /. float_of_int xp 
   and dy = (y1 -. y0) /. float_of_int yp in
   let x = ref x0 in 
@@ -102,12 +106,8 @@ let rectMandelI mandelFun (x0,y0) (x1,y1) xp yp =
       begin
 	let y = ref y0 in
 	  for yi=0 to yp do
-	    begin
-	      let color = match mandelFun (!x,!y) with
-	    | InSet -> G.black
-	    | Escape i -> snd (List.find (fun c -> i >= fst c) colorTab)
-	      in G.set_color color; G.plot xi yi;
-	    end; y := !y +. dy 
+	    processCoordsFun (!x,!y) (xi,yi);
+	    y := !y +. dy 
 	  done
       end; x := !x +. dx
     done ;;
@@ -119,30 +119,42 @@ let timeOf f =
     Printf.printf "process & wall time [s]: %f %f\n" (t1 -. t0) (wt1 -. wt0);
     res ;;
 
-let test maxit xp yp fsel =
-  forceOpen ();
-  G.resize_window xp yp;
-  let fs = [| rectMandel (goMandelC maxit); 
-	      rectMandel (goMandelF maxit);
-	      rectMandel (goMandelF' maxit);
-	      rectMandel (goMandelF'' maxit);
-	      rectMandel (goMandelF''' maxit);
-	      rectMandelI (goMandelC maxit); 
-	      rectMandelI (goMandelF maxit);
-	      rectMandelI (goMandelF' maxit);
-	      rectMandelI (goMandelF'' maxit);
-	      rectMandelI (goMandelF''' maxit);
+let (@.) f g x = g (f x) ;;
+let ($.) f g x = f (g x) ;;
+
+let test mode maxit xp yp fsel =
+  let nop = (fun _ _ -> ()) in
+  let proc = match mode with
+    | "-nop" -> nop
+    | "-gfx" -> fractDrawPix 
+    | _ -> failwith "incorrect mode" in
+  let isGfx = proc == fractDrawPix in
+  let fs = [| rectFractal ((goMandelC maxit) @. proc); 
+	      rectFractal ((goMandelF maxit) @. proc);
+	      rectFractal ((goMandelF' maxit) @. proc);
+	      rectFractal ((goMandelF'' maxit) @. proc);
+	      rectFractal ((goMandelF''' maxit) @. proc);
+	      rectFractalI ((goMandelC maxit) @. proc); 
+	      rectFractalI ((goMandelF maxit) @. proc);
+	      rectFractalI ((goMandelF' maxit) @. proc);
+	      rectFractalI ((goMandelF'' maxit) @. proc);
+	      rectFractalI ((goMandelF''' maxit) @. proc);
 	   |] in
   let testf f =
-    G.clear_graph ();
+    if isGfx then G.clear_graph ();
     timeOf (fun _-> f (-1.7,-1.2) (0.8,1.2) xp yp);
     flush stdout;
-  in match fsel with
-    | "all" -> Array.iter testf fs
-    | fno -> testf fs.(int_of_string fno)
+  in 
+    if isGfx then begin
+	forceOpen ();
+	G.resize_window xp yp;
+      end;
+    match fsel with
+      | "all" -> Array.iter testf fs
+      | fno -> testf fs.(int_of_string fno)
 ;;
 
 if not !Sys.interactive then 
   let args = String.concat " " (List.tl (Array.to_list Sys.argv))
-  in Scanf.sscanf args "%d %d %d %s" test
+  in Scanf.sscanf args "%s %d %d %d %s" test
 ;;
