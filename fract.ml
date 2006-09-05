@@ -1,4 +1,8 @@
 
+let ($) f x = f (x) ;;
+let (@.) f g x = g (f x) ;;
+let ($.) f g x = f (g x) ;;
+
 module G = Graphics;;
 module C = Complex;;
 
@@ -78,7 +82,7 @@ let goMandelF''' maxit (x0,y0) =
 let fractDrawPix (fractRes : fractality) (xi, yi) =
   let color = match fractRes with
     | InSet -> G.black
-    | Escape i -> snd (List.find (fun c -> i >= fst c) colorTab)
+    | Escape i -> snd $ List.find (fun c -> i >= fst c) colorTab
   in G.set_color color; G.plot xi yi ;;	    
 
 let rectFractal processCoordsFun (x0,y0) (x1,y1) xp yp =
@@ -119,9 +123,6 @@ let timeOf f =
     Printf.printf "process & wall time [s]: %f %f\n" (t1 -. t0) (wt1 -. wt0);
     res ;;
 
-let (@.) f g x = g (f x) ;;
-let ($.) f g x = f (g x) ;;
-
 let test mode maxit xp yp fsel =
   let nop = (fun _ _ -> ()) in
   let proc = match mode with
@@ -129,16 +130,16 @@ let test mode maxit xp yp fsel =
     | "-gfx" -> fractDrawPix 
     | _ -> failwith "incorrect mode" in
   let isGfx = proc == fractDrawPix in
-  let fs = [| rectFractal ((goMandelC maxit) @. proc); 
-	      rectFractal ((goMandelF maxit) @. proc);
-	      rectFractal ((goMandelF' maxit) @. proc);
-	      rectFractal ((goMandelF'' maxit) @. proc);
-	      rectFractal ((goMandelF''' maxit) @. proc);
-	      rectFractalI ((goMandelC maxit) @. proc); 
-	      rectFractalI ((goMandelF maxit) @. proc);
-	      rectFractalI ((goMandelF' maxit) @. proc);
-	      rectFractalI ((goMandelF'' maxit) @. proc);
-	      rectFractalI ((goMandelF''' maxit) @. proc);
+  let fs = [| rectFractal $ (goMandelC maxit) @. proc;
+	      rectFractal $ (goMandelF maxit) @. proc;
+	      rectFractal $ (goMandelF' maxit) @. proc;
+	      rectFractal $ (goMandelF'' maxit) @. proc;
+	      rectFractal $ (goMandelF''' maxit) @. proc;
+	      rectFractalI $ (goMandelC maxit) @. proc;
+	      rectFractalI $ (goMandelF maxit) @. proc;
+	      rectFractalI $ (goMandelF' maxit) @. proc;
+	      rectFractalI $ (goMandelF'' maxit) @. proc;
+	      rectFractalI $ (goMandelF''' maxit) @. proc;
 	   |] in
   let testf f =
     if isGfx then G.clear_graph ();
@@ -155,6 +156,6 @@ let test mode maxit xp yp fsel =
 ;;
 
 if not !Sys.interactive then 
-  let args = String.concat " " (List.tl (Array.to_list Sys.argv))
+  let args = String.concat " " $. List.tl $ Array.to_list Sys.argv
   in Scanf.sscanf args "%s %d %d %d %s" test
 ;;
