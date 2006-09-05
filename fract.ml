@@ -101,7 +101,8 @@ let rectFractal processCoordsFun (x0,y0) (x1,y1) xp yp =
 
 (* Imperative version is usually a bit faster with bytecode 
    and sometimes a bit slower with native G4 code. 
-   It also depends on a cpu cache (?) *)
+   Q: how do benchmarks depend on a cpu cache? 
+*)
 let rectFractalI processCoordsFun (x0,y0) (x1,y1) xp yp =
   let dx = (x1 -. x0) /. float_of_int xp 
   and dy = (y1 -. y0) /. float_of_int yp in
