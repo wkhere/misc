@@ -1,5 +1,6 @@
 module SOETest1 where
-import Graphics.SOE
+import Graphics.SOE 
+import System
 
 spaceClose :: Window -> IO ()
 spaceClose w = 
@@ -7,11 +8,12 @@ spaceClose w =
        if k==' ' then closeWindow w
                  else spaceClose w
                       
-main0 = 
-    runGraphics (
-                 do w <- openWindow 
-                         "SOE test1" (300, 300)
-                    drawInWindow w (text (100, 200) "Hello! It works!")
-                    k <- getKey w
-                    spaceClose w
-                )
+main0 = runGraphics 
+        (do 
+          host <- catch (System.getEnv "HOSTNAME") (\e -> return "unknown")
+          w <- openWindow ("SOE t1 @" ++ host) (400, 300)
+          drawInWindow w (text (20, 100) 
+                         $ "Hello! It works at the host: " ++ host)
+          k <- getKey w
+          spaceClose w
+        )
