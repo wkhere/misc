@@ -1,3 +1,3 @@
 import SOETest1
 
-main = main0
+main = do runHello; runSierp
