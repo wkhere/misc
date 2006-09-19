@@ -1,22 +1,4 @@
-
-let ($) f x = f (x) ;;
-let (@.) f g x = g (f x) ;;
-let ($.) f g x = f (g x) ;;
-
-module G = Graphics;;
-module C = Complex;;
-
-let vis () =
-  try ignore (G.size_x ()); true
-  with G.Graphic_failure s as exc -> 
-    if s = "graphic screen not opened" then false else raise exc
-;;
-
-let forceOpen () =
-  if not (vis ()) then G.open_graph 
-    (try Sys.getenv "DISPLAY" with Not_found -> ":0")
-and forceClose () =
-  if vis () then G.close_graph () ;;
+open Mygfx;;
 
 let colorTab = [20, G.white;
 		10, G.yellow;
@@ -117,14 +99,7 @@ let rectFractalI processCoordsFun (x0,y0) (x1,y1) xp yp =
       end; x := !x +. dx
     done ;;
 
-let timeOf f =
-  let t0, wt0 = Sys.time (), Unix.gettimeofday () in
-  let res =  f () in
-  let t1, wt1 = Sys.time (), Unix.gettimeofday () in
-    Printf.printf "process & wall time [s]: %f %f\n" (t1 -. t0) (wt1 -. wt0);
-    res ;;
-
-let test mode maxit xp yp fsel =
+let testMandel mode maxit xp yp fsel =
   let nop = (fun _ _ -> ()) in
   let proc = match mode with
     | "-nop" -> nop
@@ -158,5 +133,5 @@ let test mode maxit xp yp fsel =
 
 if not !Sys.interactive then 
   let args = String.concat " " $. List.tl $ Array.to_list Sys.argv
-  in Scanf.sscanf args "%s %d %d %d %s" test
+  in Scanf.sscanf args "%s %d %d %d %s" testMandel
 ;;

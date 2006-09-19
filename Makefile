@@ -1,7 +1,7 @@
 export OCAMLMAKEFILE=OCamlMakefile
 
 define PROJ_fract
-  SOURCES = fract.ml
+  SOURCES = mygfx.ml fract.ml
   RESULT = fract
   LIBS = unix graphics
 endef 
@@ -17,5 +17,5 @@ endif
 
 all:	nc
 
- %:
+%:
 	@make -f $(OCAMLMAKEFILE) subprojs SUBTARGET=$@
