@@ -44,10 +44,10 @@ let docFind matcher docL =
     | Some d -> d
     | None -> raise Not_found ;;
 
-let parentFind pred =
+let parentFind doc =
   docFind 
-    (fun cont doc -> match doc with
-      | Element (_, _, l) as par when exists pred l -> Some par
+    (fun cont d -> match d with
+      | Element (_, _, l) as par when exists doc l -> Some par
       | Element (_, _, l) -> cont l
       | _ -> None) 
 ;;
