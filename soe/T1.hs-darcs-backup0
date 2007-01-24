@@ -1,4 +1,4 @@
-module T1 where
+module SOETest1 where
 import Graphics.SOE 
 import System
 
