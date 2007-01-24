@@ -1,0 +1,23 @@
+
+targets: lf_test_ml lf_test_ml.opt lf_test_hs
+
+file="largefile"
+
+test:	targets
+	./lf_test_ml $(file)
+	./lf_test_ml.opt $(file)
+	./lf_test_hs $(file)
+
+lf_test_hs: lf_test.hs
+	ghc lf_test.hs -o lf_test_hs
+
+lf_test_ml: lf_test.ml
+	ocamlc unix.cma lf_test.ml -o lf_test_ml
+
+lf_test_ml.opt: lf_test.ml
+	ocamlopt unix.cmxa lf_test.ml -o lf_test_ml.opt
+
+clean:
+	rm -f lf_test.hi lf_test.o lf_test.cm[iox]
+allclean: clean
+	rm -f lf_test_ml* lf_test_hs
