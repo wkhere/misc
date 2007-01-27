@@ -99,13 +99,13 @@ let rectFractalI processCoordsFun (x0,y0) (x1,y1) xp yp =
       end; x := !x +. dx
     done ;;
 
-let testMandel mode maxit xp yp fsel =
-  let nop = (fun _ _ -> ()) in
-  let proc = match mode with
-    | "-nop" -> nop
-    | "-gfx" -> fractDrawPix 
-    | _ -> failwith "incorrect mode" in
-  let isGfx = proc == fractDrawPix in
+let testMandel isGfx maxit xp yp fsel =
+  let proc = 
+    let nop = (fun _ _ -> ()) in
+      match isGfx with
+	| false -> nop 
+	| true -> fractDrawPix
+  in
   let fs = [| rectFractal $ (goMandelC maxit) @. proc;
 	      rectFractal $ (goMandelF maxit) @. proc;
 	      rectFractal $ (goMandelF' maxit) @. proc;
@@ -131,7 +131,25 @@ let testMandel mode maxit xp yp fsel =
       | fno -> testf fs.(int_of_string fno)
 ;;
 
-if not !Sys.interactive then 
-  let args = String.concat " " $. List.tl $ Array.to_list Sys.argv
-  in Scanf.sscanf args "%s %d %d %d %s" testMandel
+let main () =
+  let gfxV = ref true
+  and itV = ref 10
+  and (xpV, ypV) = (ref 100, ref 100)
+  and tcV = ref "all" in
+  let usage = Printf.sprintf 
+    "Usage: %s <options>" $ Filename.basename Sys.argv.(0)
+  and optspec =
+    ["-nop", Arg.Clear gfxV, " Do not produce any output";
+     "-gfx", Arg.Set gfxV, " Produce graphics output";
+     "-it", Arg.Set_int itV, " Number of iterations";
+     "-size", Arg.Tuple [Arg.Set_int xpV; Arg.Set_int ypV], " Size: xp yp";
+     "-tc", Arg.Set_string tcV, " Test case number or 'all'";
+    ]
+  in 
+    Arg.parse optspec 
+      (fun _-> raise (Arg.Bad "unexpected arguments")) usage;
+    testMandel !gfxV !itV !xpV !ypV !tcV
+;;
+
+  if not !Sys.interactive then main ()
 ;;
