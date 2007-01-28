@@ -2,8 +2,22 @@ module Foo where
 
 import Data.IORef
 import Control.Exception (finally)
+import Text.ParserCombinators.Parsec
+import qualified Data.ByteString.Char8 as C
 import Control.Concurrent
 import Control.Concurrent.MVar
+
+ack :: Int->Int->Int
+ack 0 n = n+1
+ack m 0 = ack (m-1) 1
+ack m n = ack (m-1) (ack m (n-1))
+
+maxx x y
+    | x > y = x
+    | otherwise = y
+
+fiblist = 0 : 1 : (zipWith (+) fiblist (tail fiblist))
+faclist = 1 : (zipWith (*) [1..] faclist)
 
 -- IORef test:
 test1_1 :: IO ()
