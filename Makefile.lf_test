@@ -9,7 +9,7 @@ test:	targets
 	./lf_test_hs $(file)
 
 lf_test_hs: lf_test.hs
-	ghc lf_test.hs -o lf_test_hs
+	ghc -Wall lf_test.hs -o lf_test_hs
 
 lf_test_ml: lf_test.ml
 	ocamlc unix.cma lf_test.ml -o lf_test_ml
