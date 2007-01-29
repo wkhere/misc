@@ -1,9 +1,11 @@
 module Foo where
 
+import System.Time
 import Data.IORef
 import Control.Exception (finally)
 import Text.ParserCombinators.Parsec
 import qualified Data.ByteString.Char8 as C
+import Control.Monad
 import Control.Concurrent
 import Control.Concurrent.MVar
 
@@ -49,4 +51,20 @@ test2 = do
                       print "consumer will finish"
 
 
+-- simple test of record copying - just for remembering
+test3 :: IO ()
+test3 = do t0 <- getClockTime >>= toCalendarTime
+           let t1 = t0 { ctYear = 2100 } 
+           let t2 = t0 { ctYear = ctYear t0 + 100 }
+           sequence_ $ map (print.ctYear) [t0,t1,t2]
+
+--  let setRec r field f = r { field=f (field r) }
+
+-- now let's experiment with conversions ClockTime <-> CaledarTime
+test4 :: IO ()
+test4 = do t0 <- getClockTime
+           t1 <- liftM toClockTime $ toCalendarTime t0
+           let t2 = toClockTime $ toUTCTime t0
+           print (t0, t1, t2, t0==t1, t0==t2)
+           -- ...
 
