@@ -22,19 +22,19 @@ fiblist = 0 : 1 : (zipWith (+) fiblist (tail fiblist))
 faclist = 1 : (zipWith (*) [1..] faclist)
 
 -- IORef test:
-test1_1 :: IO ()
-test1_1 = newIORef 0 >>= \v-> readIORef v >>= 
+testRef0 :: IO ()
+testRef0 = newIORef 0 >>= \v-> readIORef v >>= 
           \a1-> writeIORef v 42 >> readIORef v >>= \a2-> print (a1,a2)
 -- the same using do:
-test1_2 :: IO ()
-test1_2 = do v <- newIORef 0
+testRef :: IO ()
+testRef = do v <- newIORef 0
              a1 <- readIORef v
              writeIORef v 42
              a2 <- readIORef v
              print (a1,a2)
 
-test2 :: IO ()
-test2 = do
+testMVar :: IO ()
+testMVar = do
   eot <- newEmptyMVar
   mV <- newEmptyMVar :: IO (MVar Int)
   print "obtained empty mV"
@@ -50,10 +50,13 @@ test2 = do
                       print $ "consumer got:" ++ (show x)
                       print "consumer will finish"
 
+-- todo: similar test for STM!
 
--- simple test of record copying - just for remembering
-test3 :: IO ()
-test3 = do t0 <- getClockTime >>= toCalendarTime
+
+-- play with time - example of record copying - just for remembering
+testTime1 :: IO ()
+testTime1  = do 
+           t0 <- getClockTime >>= toCalendarTime
            let t1 = t0 { ctYear = 2100 } 
            let t2 = t0 { ctYear = ctYear t0 + 100 }
            sequence_ $ map (print.ctYear) [t0,t1,t2]
@@ -61,8 +64,9 @@ test3 = do t0 <- getClockTime >>= toCalendarTime
 --  let setRec r field f = r { field=f (field r) }
 
 -- now let's experiment with conversions ClockTime <-> CaledarTime
-test4 :: IO ()
-test4 = do t0 <- getClockTime
+testTime2 :: IO ()
+testTime2 = do 
+           t0 <- getClockTime
            t1 <- liftM toClockTime $ toCalendarTime t0
            let t2 = toClockTime $ toUTCTime t0
            print (t0, t1, t2, t0==t1, t0==t2)
