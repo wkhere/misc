@@ -5,17 +5,16 @@ import Text.Printf (printf)
 import Char (ord, chr)
 import Data.Bits (xor)
 
-test :: Handle -> IO ()
-test h = do
+test :: Integer -> Handle -> IO ()
+test minSize h = do
   sz <- hFileSize h
   printf "file size: %d\n" sz
   hIsSeekable h >>= printf "seekable? %s\n" . show
   printf "seek at 0: "
   hSeek h AbsoluteSeek 0 >> ptell
-  printf "seek at 5g: "
-  hSeek h AbsoluteSeek 5000000000 
-  p <- ptell
-  when (sz > p) $ do  
+  printf "seek at %d: " minSize
+  hSeek h AbsoluteSeek minSize >> ptell
+  when (sz > minSize) $ do 
            printf "oh, previous size is greater; seek to end: "
            hSeek h SeekFromEnd 0 >> ptell; return ()
   let c = 'x'
@@ -34,5 +33,10 @@ test h = do
     change c = chr $ ord c `xor` 42
 
 main :: IO ()
-main =
-    getArgs >>= \x -> openBinaryFile (head x) ReadWriteMode >>= test
+main = do
+    l <- getArgs
+    case l of
+      (file:sizeS:_) ->
+          let size = (read sizeS)::Integer in
+          openBinaryFile file ReadWriteMode >>= test size
+      _ -> error "expected args: filename minSize"
