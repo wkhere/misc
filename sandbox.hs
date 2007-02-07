@@ -1,5 +1,7 @@
-module Foo where
+{-# OPTIONS -fglasgow-exts #-}
+module Sandbox where
 
+import System.IO
 import System.Time
 import Data.IORef
 import Control.Exception (finally)
@@ -8,6 +10,10 @@ import qualified Data.ByteString.Char8 as C
 import Control.Monad
 import Control.Concurrent
 import Control.Concurrent.MVar
+import Control.Concurrent.STM
+import Control.Concurrent.STM.TVar
+import Control.Concurrent.STM.TMVar
+
 
 ack :: Int->Int->Int
 ack 0 n = n+1
@@ -50,8 +56,39 @@ testMVar = do
                       print $ "consumer got:" ++ (show x)
                       print "consumer will finish"
 
--- todo: similar test for STM!
-
+-- similar test for STM, now we can wait for a given value!
+{- AFAIK 'eot' doesn't have to be TMVar, may be just independent mutex 
+   outside the STM, as plain MVar. Version with TMVars is here too, commented.
+ -}
+testTVar :: IO ()
+testTVar = do
+  v <- atom $ newTVar 0
+  eot <- prefork
+  p "forking"
+  th <- forkIO $ consumer v `finally` commit eot >> p "EOT"
+  p $ "got thread "++(show th)
+  yield; threadDelay 1000
+  p "setting value for consumer"
+  atom $ writeTVar v 42
+  p "value for consumer set"
+  unfork eot
+  p "test finished."
+    where 
+      consumer v = do
+             p "consumer: waiting for value"
+             x <- atom $ do
+                     x <- readTVar v
+                     if x==0 then retry else return x
+             p $ "consumer: got value "++(show x)
+             p "consumer: will finish"
+      atom = atomically
+      p s = do print s; System.IO.hFlush stdout
+      prefork = newEmptyMVar
+      commit eot = putMVar eot ()
+      unfork = takeMVar
+      --prefork = atom $ newEmptyTMVar
+      --commit eot = atom $ putTMVar eot ()
+      --unfork eot = atom $ takeTMVar eot
 
 -- play with time - example of record copying - just for remembering
 testTime1 :: IO ()
