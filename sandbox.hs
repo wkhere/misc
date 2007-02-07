@@ -14,6 +14,9 @@ import Control.Concurrent.STM
 import Control.Concurrent.STM.TVar
 import Control.Concurrent.STM.TMVar
 
+{- IO () tests here can be run from ghci or compiled using:
+   ghc --make  -fforce-recomp -main-is Sandbox.<func> <src>
+ -}
 
 ack :: Int->Int->Int
 ack 0 n = n+1

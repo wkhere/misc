@@ -21,6 +21,5 @@ main = do
   mainGUI
 
 {- TODO:
- - check why initGUI fails in ghci on mac (it doesn't on debian x86)
- - check "insanity" of glade
+ - find a way of multiple load/run cycle within ghci
 -}
