@@ -66,15 +66,14 @@ testMVar = do
 testTVar :: IO ()
 testTVar = do
   v <- atom $ newTVar 0
-  eot <- prefork
   p "forking"
-  th <- forkIO $ consumer v `finally` commit eot >> p "EOT"
+  (th,finish) <- fork (consumer v)
   p $ "got thread "++(show th)
   yield; threadDelay 1000
   p "setting value for consumer"
   atom $ writeTVar v 42
   p "value for consumer set"
-  unfork eot
+  finish
   p "test finished."
     where 
       consumer v = do
@@ -86,6 +85,11 @@ testTVar = do
              p "consumer: will finish"
       atom = atomically
       p s = do print s; System.IO.hFlush stdout
+      fork :: IO () -> IO (ThreadId, IO ())
+      fork task = do
+             eot <- prefork
+             tid <- forkIO $ task `finally` commit eot >> p "EOT"
+             return (tid, (unfork eot))
       prefork = newEmptyMVar
       commit eot = putMVar eot ()
       unfork = takeMVar
