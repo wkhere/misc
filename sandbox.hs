@@ -83,6 +83,7 @@ testTVar = do
                      if x==0 then retry else return x
              p $ "consumer: got value "++(show x)
              p "consumer: will finish"
+      -- helpers:
       atom = atomically
       p s = do print s; System.IO.hFlush stdout
       fork :: IO () -> IO (ThreadId, IO ())
@@ -90,12 +91,13 @@ testTVar = do
              eot <- prefork
              tid <- forkIO $ task `finally` commit eot >> p "EOT"
              return (tid, (unfork eot))
-      prefork = newEmptyMVar
-      commit eot = putMVar eot ()
-      unfork = takeMVar
-      --prefork = atom $ newEmptyTMVar
-      --commit eot = atom $ putTMVar eot ()
-      --unfork eot = atom $ takeTMVar eot
+          where
+            prefork = newEmptyMVar
+            commit eot = putMVar eot ()
+            unfork = takeMVar
+            --prefork = atom $ newEmptyTMVar
+            --commit eot = atom $ putTMVar eot ()
+            --unfork eot = atom $ takeTMVar eot
 
 -- play with time - example of record copying - just for remembering
 testTime1 :: IO ()
