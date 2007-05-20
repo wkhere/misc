@@ -20,8 +20,11 @@ p = do
                    "h"]
     where
       toMins c1 c2 = (read c1::Integer)*60 + (read c2::Integer)
-      hrDesc t1 t2 = show (fromInteger(tmDiff t1 t2)/60)
+      hrDesc t1 t2 = 
+          chop0 $ printf "%.2f" ((fromInteger(tmDiff t1 t2)/60)::Float)
           where
+            chop0 s = reverse $
+                      dropWhile (=='.') $ dropWhile (=='0') $ reverse s
             tmDiff t1 t2 = if t1 < t2 then t2-t1
                            else t2+24*60-t1
 
