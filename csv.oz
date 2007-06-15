@@ -23,15 +23,3 @@ end
 
 {Parse_ "foobar\"some thing\"\""}
 
-declare X F
-fun {F Acc} A T T1 in
-   A#T=Acc
-   T=q|T1
-   A#T1
-end
-
-declare L1={F {F X#X}}
-local A T in A#T=L1 T=nil A end
-
-declare F fun {F X#Y} [X Y] end
-{F q#e}
