@@ -9,13 +9,13 @@ declare Sep=&; Quote=&" Parse Parse_
 fun {Parse_ I} Z in {Parse I inrec Z Z} end
 proc {Parse I S Acc U ?R}
    % Acc U: an accumulator diff list
-   fun {RetAcc} U=nil Acc end
+   fun {RetAcc} U=nil tok(Acc) end
    proc {DoAcc C E S} U1 in U=C|U1 R={Parse E S Acc U1} end
    proc {SkipAcc E S} R={Parse E S Acc U} end
 in
    case S of inrec then
       case I of nil then R={RetAcc}
-      [] !Sep|E then Z in R= tok({RetAcc})|{Parse E S Z Z}
+      [] !Sep|E then Z in R= {RetAcc}|{Parse E S Z Z}
       [] !Quote|!Quote|E then {DoAcc !Quote E S}
       [] !Quote|E then {SkipAcc E quoted} 
       [] C|E then {DoAcc C E S}
@@ -29,9 +29,10 @@ in
       end
    end
 end
-% todo: above works only if input ends with separator
-% it also accepts fields loosely wrt. to quote start, ie. field can be:
+% todo: 
+% - parser accepts fields loosely wrt. to quote start, ie. field can be:
 %   <SEP>sth "some quote" sth else<SEP>
+% - tinker tail-calls
 
-{Parse_ ";;foo bar; ouch ;1 2\" 2;\"4;double \"\" inside; next;;\"quoted\";;;\"double \"\" inside quotes\" and sided;"}
+{Parse_ ";;foo bar; ouch ;1 2\" 2;\"4;double \"\" inside; next;;\"quoted\";;;\"double \"\" inside quotes\" and sided;42"}
 
