@@ -1,5 +1,9 @@
 
-sep quote dquote quote0 str
+declare Assert
+proc {Assert P Desc}
+   if P==false then {Exception.raiseError 'assert failed'} end
+end 
+declare DiffLNilP = fun {$ L U} U=nil L==nil end
 
 declare Parse Parse_
 fun {Parse_ I} Z in {Parse I start Z Z str} end
