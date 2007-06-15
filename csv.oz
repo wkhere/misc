@@ -12,10 +12,11 @@ proc {Parse I S Acc U ?R}
    fun {RetAcc} U=nil tok(Acc) end
    proc {DoAcc C E S} U1 in U=C|U1 R={Parse E S Acc U1} end
    proc {SkipAcc E S} R={Parse E S Acc U} end
+   proc {PopAcc E} Z in R= {RetAcc}|{Parse E S Z Z} end
 in
    case S of inrec then
       case I of nil then R={RetAcc}
-      [] !Sep|E then Z in R= {RetAcc}|{Parse E S Z Z}
+      [] !Sep|E then {PopAcc E}
       [] !Quote|!Quote|E then {DoAcc !Quote E S}
       [] !Quote|E then {SkipAcc E quoted} 
       [] C|E then {DoAcc C E S}
