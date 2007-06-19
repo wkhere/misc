@@ -19,7 +19,7 @@ define
       proc {PopAcc E} Z in R= {RetAcc}|{Parse E S Z Z} end
    in
       case S of inrec then
-	 case I of nil then R={RetAcc}
+	 case I of nil then R={RetAcc}|nil
 	 [] !Sep|E then {PopAcc E}
 	 [] !Quote|!Quote|E then {DoAcc !Quote E S}
 	 [] !Quote|E then {SkipAcc E quoted} 
