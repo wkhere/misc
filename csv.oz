@@ -1,6 +1,8 @@
 
 functor
 export parseLine:ParseLine
+import
+   T at 'testhelper.ozf'
 define
    proc {Assert P Desc}
       if P==false then {Exception.raiseError 'assert failed'} end
@@ -39,5 +41,20 @@ define
 %   <SEP>sth "some quote" sth else<SEP>
 % - tinker tail-calls
 
-   Test1 = {ParseLine ";;foo bar; ouch ;1 2\" 2;\"4;double \"\" inside; next;;\"quoted\";;;\"double \"\" inside quotes\" and sided;42"}
+   % the following is for crude testing support
+   Tests = [
+	    {ParseLine nil} == [tok(nil)]
+	    {ParseLine ""} == [tok(nil)]
+	    {ParseLine ";"} == [tok(nil) tok(nil)]
+	    {ParseLine ";;foo bar; ouch ;1 2\" 2;\"4;double \"\" inside; next;;\"quoted\";;;\"double \"\" inside quotes\" and sided;42"} ==
+	    [tok(nil) tok(nil) tok("foo bar") 
+	     tok(" ouch ") tok("1 2 2;4") 
+	     tok("double \" inside") 
+	     tok(" next") tok(nil) tok("quoted") tok(nil) tok(nil) 
+	     tok("double \" inside quotes and sided") tok("42")]
+	   ]
+   Pr=T.pr
+   {ForAll Tests proc {$ TC}
+		    {Pr "test="#(if TC then "t" else "f" end)} end}
+   {T.exit 0}
 end
