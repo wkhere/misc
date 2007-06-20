@@ -53,8 +53,8 @@ define
 	     tok(" next") tok(nil) tok("quoted") tok(nil) tok(nil) 
 	     tok("double \" inside quotes and sided") tok("42")]
 	   ]
-   Pr=T.pr
+   Pr=T.pr Br=T.br
    {ForAll Tests proc {$ TC}
-		    {Pr "test="#(if TC then "t" else "f" end)} end}
+		    {Br "test="#(if TC then "t" else "f" end)} end}
    {T.exit 0}
 end
