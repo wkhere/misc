@@ -1,16 +1,19 @@
 
 functor
 export parseLine:ParseLine
+   sep:SepC quote:QuoteC
 import
    T at 'testhelper.ozf'
 define
 
-   Sep=&; Quote=&"
+   SepC={NewCell &;} QuoteC={NewCell &"}
 
    fun {ParseLine I} Z in {Parse I inrec Z Z} end
 
    proc {Parse I S Acc U ?R}
    % Acc U: an accumulator diff list
+      Sep=@SepC Quote=@QuoteC
+      % ^ shouldn't they be initialized once for ParseLine invoke
       fun {RetAcc} U=nil tok(Acc) end
       proc {DoAcc C E S} U1 in U=C|U1 R={Parse E S Acc U1} end
       proc {SkipAcc E S} R={Parse E S Acc U} end
