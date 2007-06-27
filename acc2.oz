@@ -57,3 +57,18 @@ declare Re1={RE.make "^Outbox"}
 {SearchAll Q1}
 {ExploreAll Q1}
 
+% processing csv lines in chunks
+
+declare EmptyRec
+fun {EmptyRec Rec}
+   {All Rec fun {$ X} X==tok(nil) end} 
+end
+
+declare F class File from Open.text Open.file end
+F= {New File init(name:"t0.csv" flags:[text read])}
+
+declare L={F getS($)}
+declare R={M.parse L}
+{EmptyRec R}#R
+{f close}
+
