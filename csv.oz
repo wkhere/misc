@@ -6,7 +6,7 @@ import
    T at 'testhelper.ozf'
 define
 
-   SepC={NewCell &;} QuoteC={NewCell &"}
+   SepC={NewCell &,} QuoteC={NewCell &"}
 
    fun {Parse I} 
       Sep=@SepC Quote=@QuoteC
@@ -44,10 +44,10 @@ define
    Tests = [
 	    {Parse nil} == [tok(nil)]
 	    {Parse ""} == [tok(nil)]
-	    {Parse ";"} == [tok(nil) tok(nil)]
-	    {Parse ";;foo bar; ouch ;1 2\" 2;\"4;double \"\" inside; next;;\"quoted\";;;\"double \"\" inside quotes\" and sided;42"} ==
+	    {Parse ","} == [tok(nil) tok(nil)]
+	    {Parse ",,foo bar, ouch ,1 2\" 2,\"4,double \"\" inside, next,,\"quoted\",,,\"double \"\" inside quotes\" and sided,42"} ==
 	    [tok(nil) tok(nil) tok("foo bar") 
-	     tok(" ouch ") tok("1 2 2;4") 
+	     tok(" ouch ") tok("1 2 2,4") 
 	     tok("double \" inside") 
 	     tok(" next") tok(nil) tok("quoted") tok(nil) tok(nil) 
 	     tok("double \" inside quotes and sided") tok("42")]
