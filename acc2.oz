@@ -9,9 +9,7 @@ fun {CompleteAc R0} R in
 	[invoiceno#na recDate#na cost#none comment#""]}
    if false=={All [1 value charged chargeDate desc]
 	      fun {$ X} {HasFeature R X} end}
-   then
-      raise badarg(missing mandatory feature) end
-   end
+   then raise badarg(missing mandatory feature) end end
    R
 end
 
@@ -53,7 +51,8 @@ declare Re1={RE.make "^Outbox"}
     %{List.take D 6}="Outbox"
     {RE.search Re1 D}\=false =true
     X=sol(I V D)
- end}
+ end
+}
 
 {SearchAll Q1}
 {ExploreAll Q1}
