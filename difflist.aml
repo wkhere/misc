@@ -1,0 +1,37 @@
+(*) -*-aliceml-*-
+
+open Promise
+
+val p=promise and f=future and ff=fulfill
+
+type ('a,'b) difflist2 = 'a list * 'b list promise
+type 'a difflist = ('a,'a) difflist2
+
+fun consd (l: 'a list) = 
+  let val p'=p()
+    val rec cons = fn 
+      | [] => f p'
+      | x::xs => x:: cons xs
+  in (cons l, p'): 'a difflist 
+end
+
+fun emptyd () = consd []
+
+fun finWith (d: 'a difflist) l = let in ff(#2 d, l); (#1 d) end
+fun fin (d: 'a difflist) = finWith d []
+
+fun add (d: 'a difflist) x = 
+  let val p'=p() val (l,ys)=d in ff(ys, x:: f p'); (l, p'): 'a difflist 
+end  
+
+fun append ((l1, p1), (l2, p2)) =
+   let in ff(p1, l2); (l1, p2): 'a difflist
+end
+
+(* caution: 
+   - when adding or appending, the left-arg dlist is invalidated
+   - it's impossible to append a list more than once - the right-arg dlist
+     can live itself but can't be used together with that left dlist
+   todo: 
+   - find a way to compare dlists without fulfilling
+*)
