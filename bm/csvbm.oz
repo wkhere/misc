@@ -1,8 +1,8 @@
 functor
 export run:Run
 import
-   CSV at 'csv.ozf'
-   T at 'testhelper.ozf'
+   CSV at '../csv.ozf'
+   T at '../testhelper.ozf'
    Open System
 define
    class File from Open.text Open.file end
