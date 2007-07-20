@@ -1,32 +1,38 @@
+import "difflist"
+
+structure Csv = struct
 
 val sep = #"," val quote = #"\""
 
 datatype token = Tok of string
 datatype state = InRec | Quoted
 
-fun addc l c = l @ [c]
-and zero () = []
+fun addc l c = add l c
+and zero () = emptyd ()
+and ret acc = Tok (lazy String.implode (fin acc))
 
 fun doparse inp st acc =
-    let fun retacc () = Tok (String.implode acc)
-	fun doacc c e st = doparse e st (addc acc c)
-	fun skipacc e st = doparse e st acc
-	fun popacc e = retacc() :: doparse e st (zero())
+    let fun retacc () = ret acc
+      fun doacc c e st = doparse e st (addc acc c)
+      fun skipacc e st = doparse e st acc
+      fun popacc e = retacc() :: doparse e st (zero())
     in
-	case st of 
-	    InRec =>
-	    (case inp of
-		 nil => retacc() ::nil
-	       | s::e if (s=sep) => popacc e
-	       | q1::q2::e if (q1=quote andalso q1=q2) => doacc quote e st
-	       | q::e if (q=quote) => skipacc e Quoted
-	       | c::e => doacc c e st)  
-	  | Quoted =>
-	    (case inp of
-		 nil => raise Domain
-	       | q1::q2::e if (q1=quote andalso q1=q2) => doacc quote e st
-	       | q::e if (q=quote) => skipacc e InRec
-	       | c::e => doacc c e st)
+      case st of 
+	InRec => 
+	(case inp of
+	   nil => retacc() ::nil
+	 | s::e if (s=sep) => popacc e
+	 | q1::q2::e if (q1=quote andalso q1=q2) => doacc quote e st
+	 | q::e if (q=quote) => skipacc e Quoted
+	 | c::e => doacc c e st)  
+      | Quoted =>
+	(case inp of
+	   nil => raise Domain
+	 | q1::q2::e if (q1=quote andalso q1=q2) => doacc quote e st
+	 | q::e if (q=quote) => skipacc e InRec
+	 | c::e => doacc c e st)
     end
     
-fun parse inp = doparse (String.explode inp) InRec (zero())
+fun parse inp = doparse (lazy String.explode inp) InRec (zero())
+
+end

@@ -1,0 +1,18 @@
+import "../csv"
+
+fun parseAll ins =
+    let fun lazy loop () =
+	    case (TextIO.inputLine ins) of 
+	      NONE => nil
+	    | SOME s => (Csv.parse s):: loop()
+    in loop ()
+    end
+
+val ins = TextIO.stdIn
+
+val res = parseAll ins 
+
+do Print.printVal (length (List.concat res))
+do print " tokens"
+
+do if CommandLine.name() <> "x-alice:/tools/Toplevel" then OS.Process.exit 0
