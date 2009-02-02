@@ -1,0 +1,11 @@
+- *.o
+- *.cm[iox]
+- *.opt
+- *.hi
+- ._d
+- sandbox
+- bunny
+- fract
+- timeline
+- gtktest
+- thrill
