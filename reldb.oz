@@ -1,3 +1,4 @@
+% todo: possibly get rid of class and leave funs operating on a dict
 functor
 export
    relation:Relation
