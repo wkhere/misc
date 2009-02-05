@@ -23,7 +23,7 @@ Io> getSlot("m") type
 Io> getSlot("m") code
 ==> method(23)
 
-# block->method: b setScope newobj; newobj m := method(b call)
+# block->method: b setScope(newobj); newobj m := method(b call)
 # method->method: newobj m := otherObj getSlot("m")
 
 ===== Io local vars
@@ -42,6 +42,13 @@ Io> m:=method(x, x1:=x+1, x1)  # setSlot is a parameter name
 ==> method(x, setSlot, 
     x1
 )
+To refer to object slot inside method, use self:
+Movie := Object clone
+Movie init := method(self cast := List clone)
+Or use = with the assumption that the slot was created
+http://iota.flowsnake.org/methods-and-blocks.html:
+"Well, by default a message is sent to Locals, but if Locals does not
+respond to it (as with "Number"), it is sent to self instead"
 
 ===== Io questions
 - How to interrupt current op but don't exit the interpreter?
@@ -52,6 +59,11 @@ Io> m:=method(x, x1:=x+1, x1)  # setSlot is a parameter name
 - cursor reflects the changes of its db
 - second db object doesn't reflect the changes even after first sync'ed (SUX)
   but its cursor works (bugs?)
+
+==== singleton
+GeorgeClooney := FamousActor clone
+GeorgeClooney clone = GeorgeClooney
+
 */
 
 # count := 100
