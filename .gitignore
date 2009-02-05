@@ -1,0 +1,6 @@
+*.o
+*.beam
+*.cm[iox]
+*.hi
+*.ozf
+*.alc
