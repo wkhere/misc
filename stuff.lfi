@@ -1,0 +1,13 @@
+;; -*- LFE -*-
+;; here goes prototype & untested macrology stuff
+
+(include-file "tools.lfi")
+
+;; unnecessary as andalso, orelse do the same:
+;; (defmacro and*
+;;   ([] `'true)
+;;   ([x . xs] `(if ,x (and* ,@xs) 'false)))
+
+;; (defmacro or*
+;;   ([] `'false)
+;;   ([x . xs] `(if ,x 'true (or* ,@xs))))

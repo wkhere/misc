@@ -1,0 +1,312 @@
+;; -*- LFE -*-
+;; macrology only, so can be included before module definition
+
+;; macro-building bits
+
+(defmacro body-list () '(= body _))
+(defmacro args-list () '(= args _))
+
+(defmacro synonym (new old)
+  `(defmacro ,new 
+     ((body-list) `(,',old ,@body))))
+
+(synonym is =:=)
+
+(defmacro empty? (x) `(is [] ,x)) 
+(defmacro cons? (x) `(case ,x ([_ . _] 'true) (_ 'false)))
+
+(defmacro defun/c ((body-list) `(eval-when-compile (defun ,@body))))
+
+(defun/c listq (xs)
+  (if (empty? xs) [] `(list ,@xs)))
+
+;; gensym by rv/etnt
+(defun/c gensym ()
+  (fletrec ((gen (n)
+	       (let ((uniq? (++ '"_#G" (integer_to_list n))))
+		 (try (progn
+			(list_to_existing_atom uniq?)
+			(gen (+ n 1)))
+		      (catch
+			((tuple _ _ _) (list_to_atom uniq?)))))))
+    (gen 1)))
+
+;; w/gensyms pg-style
+(defmacro w/gensyms 
+  ([vars . body]
+   `(let ,(lc ((<- v vars)) `(,v (gensym)))
+      ,@body)))
+
+;; clojure-like stuff
+(synonym fn lambda)
+(synonym do progn)
+
+;; cl-like stuff
+
+(synonym eq =:=)
+(synonym neq =/=)
+(defmacro nil? (x) `(eq [] ,x)) 
+(defmacro non-nil? (x) `(neq [] ,x))
+
+(defmacro 1- (n) `(- ,n 1))
+(defmacro 1+ (n) `(+ ,n 1))
+
+;; haskell-like stuff
+(defmacro fst (x) `(element 1 ,x))
+(defmacro snd (x) `(element 2 ,x))
+
+;; fun fun
+
+(defmacro id () `(fn (x) x))
+(defmacro const (k) `(fn (_) ,k))
+;; todo: const fun of given arity
+
+;; fun composition, inspired by OnLisp
+
+(defmacro compose
+  ([funs fold]
+   `(fn (x) (funcall ,fold (fn (f a) (funcall f a)) x ,funs)))
+  ([funs]
+   `(compose ,funs (fun lists foldr 3))))
+
+(defmacro rev-compose (funs)
+  `(compose ,funs (fun lists foldl 3)))
+(synonym chain rev-compose)
+
+(defmacro complement (pred)
+  `(compose (fun not 1) ,pred))
+
+;; shortening stuff
+
+(defmacro when* ((body-list) `(when (andalso ,@body))))
+
+(defmacro let1 
+  ([var val . body] `(let ((,var ,val)) ,@body)))
+
+(defmacro def-fop1 (op name)
+  `(defmacro ,name
+     ([[f fargs . fbody] . body] `(,',op ((,f ,fargs ,@fbody)) ,@body))))
+(def-fop1 flet flet1)
+(def-fop1 fletrec fletrec1)
+(def-fop1 macrolet macrolet1)
+
+
+;; defensive catcher
+(defmacro catch-when
+  ([errname 'catcharg catcharg 'ret subst 'call mod f . args]
+   `(try (call ,mod ,f ,@args)
+	 (catch ((tuple 'error ,errname [(tuple ,mod ,f ,catcharg) . _]) 
+		 ,subst))))
+  ([errname 'ret subst 'call . callargs]
+   `(catch-when ,errname catcharg _ ret ,subst call ,@callargs)))
+  
+;; more macro builders
+
+(defun/c group
+  ([_ n] (when (=< n 0)) (error '"non-positive grouping size"))
+  ([xs n]
+   (fletrec1 (build (xs acc)
+		    (let1 (tuple chunk rest) 
+			  (catch-when 'badarg ret #([] [])
+				      call 'lists 'split n xs)
+			  (if (cons? rest)
+			    (build rest (cons chunk acc))
+			    (: lists reverse (cons xs acc)))))
+	     (if (empty? xs) [] (build xs [])))))
+
+;; more shortening
+
+;; clojure-like (let/ [x 1 y 2] . body)
+(defmacro let/
+  ([binds . body]
+   `(let ,(group binds 2) ,@body)))
+
+;; more macro builders
+
+;; (defmacro build-n (n op xs)
+;;   `(macrolet ((builder ([0 arg] arg) 
+;; 		       ([n arg] `(,',op (builder ,(1- n) ,arg)))))
+;;      (builder ,n ,xs)))
+;; ^^ seems ugly
+
+;; this builds n tokens so not named nthcdr which was function
+;; originally in CL
+;;(defmacro build-nthcdr' (n xs) `(build-n ,n cdr' ,xs))
+;; ^^ bug?
+
+;; build macro from a function definition avoiding capture by using closure 
+
+(defun/c n-symbols (n)
+  (lc ((<- i (: lists seq 1 n)))
+    (list_to_atom (++ '"a" (: lfe_io print1 i)))))
+
+(defun/c macro/f-gen (name args body)
+  (let1 decl-args (n-symbols (length args))
+	`(,name ,decl-args
+		`(flet [(f ,',args ,@',body)] (f ,,@decl-args)))))
+
+(defmacro defmacro/f 
+  ([name args . body]
+   `(defmacro ,@(macro/f-gen name args body))))
+
+(defmacro macrolet1/f
+  ([[name args . body] . mbody]
+   `(macrolet1 ,(macro/f-gen name args body) ,@mbody)))
+
+;; this is not needed but shows how I started:
+(defmacro defmacro/f/1 
+  ([name arg . body]
+   `(defmacro ,name (x)
+      `(flet [(f ,',arg ,',@body)] (f ,x)))))
+
+
+;; cl-like "defensive" car/cdr family -- with \' suffix
+
+(defmacro/f car' (xs)
+  (if (non-nil? xs) (hd xs) []))
+
+(defmacro/f cdr' (xs)
+  (if (non-nil? xs) (tl xs) []))
+
+(defmacro nthcdr' (n xs)
+  `(funcall (compose (: lists duplicate ,n (fn (x) (cdr' x)))) ,xs))
+
+;;(defmacro nthcdr' (n xs)
+;;  `(catch-when 'function_clause catcharg [_ []] ret []
+;;	       call 'lists 'nthtail ,n ,xs))
+;; ^^ BUG when called from a module
+
+;;(defmacro cddr' (xs)   `(build-nthcdr' 2 ,xs))
+(defmacro cddr' (xs)  `(nthcdr' 2 ,xs))
+(defmacro cdddr' (xs)  `(nthcdr' 3 ,xs))
+(defmacro cddddr' (xs) `(nthcdr' 4 ,xs))
+(defmacro cadr' (xs)   `(car' (cdr' ,xs)))
+(defmacro caddr' (xs)  `(car' (cddr' ,xs)))
+(defmacro cadddr' (xs) `(car' (cdddr' ,xs)))
+
+(synonym first car')
+(synonym second cadr')
+(synonym third caddr')
+
+;; abbrevs
+
+(defun/c abbrev-fdef-parse
+  ([[f0 'as f]] (list f0 f))
+  ([f] (list f f)))
+
+(defun/c abbrev-gen-macrodefs (mod fs)
+  (lc ((<- fdef fs))
+    (let1 [f0 f] (abbrev-fdef-parse fdef)
+	  `(,f ((args-list) `(: ,',mod ,',f0 ,@args))))))
+
+(defmacro abbrev
+  ([mod f . fs]
+   (let1 defs (lc ((<- def (abbrev-gen-macrodefs mod (cons f fs))))
+		(cons 'defmacro def))
+	 `(do ,@defs))))
+
+;; the same as local macros:
+
+(defmacro w/abbrev
+  ([[mod f . fs] . body]
+   (let1 defs (abbrev-gen-macrodefs mod (cons f fs))
+	 `(macrolet ,defs ,@body))))
+
+(defmacro w/abbrevs
+  ([mf-defs . body]
+   (let1 defs (: lists append
+		(lc ((<- [m . fs] mf-defs))
+		  (abbrev-gen-macrodefs m fs)))
+    `(macrolet ,defs ,@body))))
+
+;; now define some:
+(abbrev erlang error)
+(abbrev lists  map foldl reverse)
+;; ^^ BEWARE! Such global abbrev can screw defmodule's imports if
+;; these macros are included before defmodule
+
+;; misc
+
+(defmacro maybe 
+  ([f x . xs] 
+   (let ((x' (gensym)))
+     `(if (nil? ,x') [] (,f ,x' ,@xs)))))
+
+;; pprint, run, timings, debug, profile
+
+(defmacro p (term) 
+  ;;todo: - use lfe except for binaries when fallback to erl
+  `(: io format '"~p" (list ,term)))
+
+(defmacro apply-to
+  ([m0 f0 mod f . args] `(call ',m0 ',f0 ',mod ',f ,(listq args))))
+
+(defmacro tc
+  ;; todo: change so it accepts a lambda (or any code block!) as well
+  ([mod f . args] `(apply-to timer tc ,mod ,f ,@args)))
+
+;; todo: write a macro which repeats tc, gets the avg or median
+
+;; assert stuff
+
+(defmacro assert (pred)
+  `(if (is 'true ,pred) 'ok 
+       (error '(assertion-failed ,pred))))
+
+(defmacro assert=   (val expr) `(assert (is ,val ,expr)))
+(defmacro assert==  (val expr) `(assert (== ,val ,expr)))
+
+;; spawn/receive helpers
+
+(defmacro recvloop ; captures (loop)
+  ((body-list) `(fletrec1 (loop () (receive ,@body)) (loop))))
+
+(defmacro spawn-recvloop ; captures (loop)
+  ((body-list) `(spawn (fn () (recvloop ,@body)))))
+
+
+;; test
+
+(defmacro/f test ()
+  ;; It was defun/c, but again, eval-when-compile functions 
+  ;; can't use macrolet, so broke some tests.
+  ;;(assert  (=/= (gensym) (gensym)))
+  (assert= 42 (funcall (id) 42))
+  (assert= 42 (funcall (const 42) 'foo))
+  (let1 fs [list (fn (x) (+ 10 x)) (fn (x) (* 2 x))]
+	(assert= 16 (funcall (compose fs) 3))
+	(assert= 26 (funcall (chain fs) 3)))
+  (assert= 42 (funcall (compose (: lists duplicate 10 (id))) 42))
+  ;;(assert= '[[1 2] [3 4] [5]] (group '[1 2 3 4 5] 2))
+  (assert= 42 (let1 x 42 x))
+  (assert= '[1 2 3] (let/ [x 1 y 2 z 3] (list x y z)))
+  (assert= '[2 3] (let1 xs '[1 2 3] (cdr' xs)))
+  (assert= [] (cdr' []))
+  (assert= [] (first []))
+  (assert= [] (cddr' []))
+  (assert= [] (nthcdr' 10 []))
+  (assert= [] (nthcdr' 10 '[1 2 3 4 5 6]))
+  (assert=
+   (let1 proc (spawn-recvloop (['ping p] (! p `[pong ,(self)])))
+	 (! proc `[ping ,(self)])
+	 (receive (['pong proc] 'ok) (after 500 'bad)))
+   'ok)
+  (assert= 1.0 (w/abbrev (math cos) (cos 0)))
+  (assert= 1.0 (w/abbrev (math [cos as cosinus]) (cosinus 0)))
+  (assert= 2.0 (w/abbrev (math cos sin pi) 
+			 (+ (cos 0) (sin (/ (pi) 2)))))
+  (assert= 2.0 (w/abbrev (math [cos as cosinus] [sin as sinus] [pi as mkpi]) 
+			 (+ (cosinus 0) (sinus (/ (mkpi) 2)))))
+  (assert= 1.0 (w/abbrevs [[math pi] [math sin]] (sin (/ (pi) 2))))
+  (assert= 1.0 (w/abbrevs [[math [pi as mkpi]] [math sin]]
+			  (sin (/ (mkpi) 2))))
+  (assert= '[42] (w/abbrevs [[math [pi as mkpi]] [math [sin as sinus]]
+			     [string [copies as dupstr]]]
+			    (dupstr '"*" (trunc (sinus (/ (mkpi) 2))))))
+  (assert= '[42] (w/abbrevs [[math [pi as mkpi] [sin as sinus]]
+			     [string [copies as dupstr]]]
+			    (dupstr '"*" (trunc (sinus (/ (mkpi) 2))))))
+  (assert= 42 (macrolet1/f (f (x y) (+ x y)) (f 32 10)))
+  (assert= 42 (macrolet1/f (f (x y) (+ x y)) 
+			   (let1 x -10 (f 52 x))))
+  'ok)
