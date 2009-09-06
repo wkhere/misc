@@ -58,8 +58,11 @@
 ;; fun fun
 
 (defmacro id () `(fn (x) x))
-(defmacro const (k) `(fn (_) ,k))
-;; todo: const fun of given arity
+
+(defmacro const 
+  ([k] `(fn (_) ,k))
+  ([k arity]
+   `(fn ,(: lists duplicate arity '_) ,k)))
 
 ;; fun composition, inspired by OnLisp
 
