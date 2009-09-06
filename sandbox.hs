@@ -118,7 +118,24 @@ testTime2 = do
            t1 <- liftM toClockTime $ toCalendarTime t0
            let t2 = toClockTime $ toUTCTime t0
            print (t0, t1, t2, t0==t1, t0==t2)
-           -- ...
+
+
+data Foo a = Foo | Bar a
+             deriving (Show)
+                                                                               
+
+data Rec keyT valT = Rec { key :: keyT, val :: valT }
+                     deriving (Show)
+
+data User u = User u deriving (Show)
+data Date = Date Integer Integer Integer
+            deriving (Show)
+data PracticeType = P | DU | BM | A | KO
+                    deriving (Show)
+data PracticeRec idT uT = Practice { 
+     pid::idT, who::User uT, date::Date, 
+     ptype::PracticeType, num::Integer
+    } deriving (Show)
 
 -- now for sth completely different
 
