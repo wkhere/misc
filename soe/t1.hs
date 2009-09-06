@@ -1,5 +1,5 @@
 module T1 where
-import Graphics.SOE 
+import Graphics.SOE.Gtk
 import System
 
 spaceClose :: Window -> IO ()
