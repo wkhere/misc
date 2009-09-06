@@ -55,6 +55,20 @@
 (defmacro fst (x) `(element 1 ,x))
 (defmacro snd (x) `(element 2 ,x))
 
+;; shortening the parens
+
+(defmacro when* ((body-list) `(when (andalso ,@body))))
+
+(defmacro let1 
+  ([var val . body] `(let ((,var ,val)) ,@body)))
+
+(defmacro def-fop1 (op name)
+  `(defmacro ,name
+     ([[f fargs . fbody] . body] `(,',op ((,f ,fargs ,@fbody)) ,@body))))
+(def-fop1 flet flet1)
+(def-fop1 fletrec fletrec1)
+(def-fop1 macrolet macrolet1)
+
 ;; fun fun
 
 (defmacro id () `(fn (x) x))
@@ -78,21 +92,6 @@
 
 (defmacro complement (pred)
   `(compose (fun not 1) ,pred))
-
-;; shortening stuff
-
-(defmacro when* ((body-list) `(when (andalso ,@body))))
-
-(defmacro let1 
-  ([var val . body] `(let ((,var ,val)) ,@body)))
-
-(defmacro def-fop1 (op name)
-  `(defmacro ,name
-     ([[f fargs . fbody] . body] `(,',op ((,f ,fargs ,@fbody)) ,@body))))
-(def-fop1 flet flet1)
-(def-fop1 fletrec fletrec1)
-(def-fop1 macrolet macrolet1)
-
 
 ;; defensive catcher
 (defmacro catch-when
