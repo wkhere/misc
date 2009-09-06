@@ -1,6 +1,23 @@
+# binaries
+sandbox
+timeline
+bunny
+fract
+gtktest
+thrill
+hs2erl
+lf_test
+soe/main
+
+# data
+*.ets
+*.dets
+
+# compilation byproducts
 *.o
 *.beam
-*.cm[iox]
+*.core
 *.hi
+*.cm[iox]
 *.ozf
 *.alc
