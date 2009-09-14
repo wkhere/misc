@@ -274,6 +274,15 @@
 (defmacro spawn-recvloop ; captures (loop)
   ((body-list) `(spawn (fn () (recvloop ,@body)))))
 
+;; module generation
+
+;; compiles a module from forms and sends it to given nodes
+(defmacro mkmod
+  ([body] `(mkmod `(,(node)) ,body))
+  ([nodes body]
+   `(let1 (tuple 'ok mod bin) (: lfe_comp forms ',body '[binary])
+	  (lc ((<- node ,nodes))
+	    (list node (: rpc call node 'code 'load_binary `[,mod undefined ,bin]))))))
 
 ;; test
 
