@@ -250,8 +250,10 @@
   ([m0 f0 mod f . args] `(call ',m0 ',f0 ',mod ',f ,(listq args))))
 
 (defmacro tc
-  ;; todo: change so it accepts a lambda (or any code block!) as well
+  (['do . block] `(tc fun (fn () ,@block))) 
+  (['fun f . args] `(tc erlang apply ,f ,(listq args)))
   ([mod f . args] `(apply-to timer tc ,mod ,f ,@args)))
+;; todo: generalize this as sth like lift-run?
 
 ;; todo: write a macro which repeats tc, gets the avg or median
 
