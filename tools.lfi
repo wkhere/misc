@@ -140,7 +140,7 @@
 
 (defun/c n-symbols (n)
   (lc ((<- i (: lists seq 1 n)))
-    (list_to_atom (++ '"a" (: lfe_io print1 i)))))
+    (list_to_atom (++ '"x" (: lfe_io print1 i)))))
 
 (defun/c macro/f-gen (name args body)
   (let1 decl-args (n-symbols (length args))
