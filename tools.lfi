@@ -223,9 +223,15 @@
 
 ;; now define some:
 (abbrev erlang error)
-(abbrev lists  map foldl reverse)
+(abbrev lists  map foldl foldr filter reverse)
 ;; ^^ BEWARE! Such global abbrev can screw defmodule's imports if
 ;; these macros are included before defmodule
+
+(defmacro/f foldl1 (f lst)
+  (let1 [x . xs] lst  (foldl f x xs))) 
+
+(defmacro/f foldr1 (f lst)
+  (let1 [x . xs] lst  (foldr f x xs))) 
 
 ;; misc
 
