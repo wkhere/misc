@@ -78,6 +78,8 @@
   ([k arity]
    `(fn ,(: lists duplicate arity '_) ,k)))
 
+; todo: fun builders like (mkfn > _ a) =:= (fn (x) (> x a))
+
 ;; fun composition, inspired by OnLisp
 
 (defmacro compose
