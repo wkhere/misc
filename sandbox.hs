@@ -13,6 +13,7 @@ import Control.Concurrent.MVar
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TVar
 import Control.Concurrent.STM.TMVar
+import Test.QuickCheck
 
 {- IO () tests here can be run from ghci or compiled using:
    ghc --make  -fforce-recomp -main-is Sandbox.<func> <src>
@@ -118,3 +119,25 @@ testTime2 = do
            print (t0, t1, t2, t0==t1, t0==t2)
            -- ...
 
+-- now for sth completely different
+
+data Foo = Foo Int deriving (Eq,Show)
+
+lift1 f (Foo x) = Foo (f x)
+lift2 f (Foo x) (Foo y) = Foo (f x y)
+
+instance Num Foo where
+    fromInteger = Foo . fromInteger
+    (+) = lift2 (+)
+    (*) = lift2 (*)
+    negate = lift1 negate
+    signum = lift1 signum
+    abs = lift1 abs
+
+prop_foo_numop op xs = foldr (lift2 op) 0 (map Foo xs)
+                       == Foo (foldr op 0 xs)
+
+testFoo :: IO ()
+testFoo = do 
+  mapM (quickCheck . prop_foo_numop) [(+), (*)]
+  return ()
