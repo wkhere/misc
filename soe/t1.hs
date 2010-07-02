@@ -8,15 +8,14 @@ spaceClose w =
        if k==' ' then closeWindow w
                  else spaceClose w
                       
-runHello = runGraphics 
-        (do 
-          host <- catch (System.getEnv "HOSTNAME") (\e -> return "unknown")
-          w <- openWindow ("SOE t1 @" ++ host) (400, 300)
-          drawInWindow w (text (20, 100) 
-                         $ "Hello! It works at the host: " ++ host)
-          k <- getKey w
-          spaceClose w
-        )
+runHello = runGraphics $ do
+             host <- catch (System.getEnv "HOSTNAME") 
+                         (\e -> return "unknown")
+             w <- openWindow ("SOE t1 @" ++ host) (400, 300)
+             drawInWindow w (text (20, 100) 
+                               $ "Hello! It works at the host: " ++ host)
+             k <- getKey w
+             spaceClose w
 
 fillTri :: Window -> Int -> Int -> Int -> IO ()
 fillTri w x y size =
@@ -34,10 +33,7 @@ sierpTri w minSize size x y =
                        sierpTri' size2 (x+size2) y
     in sierpTri' size x y
 
-runSierp = 
-    runGraphics 
-    (do
-      w <- openWindow "SOE SierpTri" (500, 500)
-      sierpTri w 8 256 50 300 
-      spaceClose w
-    )
+runSierp = runGraphics $ do
+             w <- openWindow "SOE SierpTri" (500, 500)
+             sierpTri w 8 256 50 300 
+             spaceClose w
