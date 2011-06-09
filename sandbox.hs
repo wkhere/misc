@@ -64,15 +64,16 @@ testMVar = do
 {- AFAIK 'eot' doesn't have to be TMVar, may be just independent mutex 
    outside the STM, as plain MVar. Version with TMVars is here too, commented.
  -}
-testTVar :: IO ()
-testTVar = do
+testSTM = testTVar 42
+testTVar :: Int -> IO ()
+testTVar v0 = do
   v <- atom $ newTVar 0
   p "forking"
   (th,finish) <- fork (consumer v)
   p $ "got thread "++(show th)
   yield; threadDelay 1000
   p "setting value for consumer"
-  atom $ writeTVar v 42
+  atom $ writeTVar v v0
   p "value for consumer set"
   finish
   p "test finished."
