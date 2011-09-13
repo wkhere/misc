@@ -9,9 +9,10 @@
            (flush-output))
          (super-new)))
 
+(define evs (make-eventspace))
 (define w
   ;; without the new eventspace window refreshing sux:
-  (parameterize ([current-eventspace (make-eventspace)])
+  (parameterize ([current-eventspace evs])
     (new frame% [label "FOO"] [width 200][height 200])))
 (define c
   (new canvas1% [parent w]
@@ -62,7 +63,10 @@
           (loop (add1 i) nx ny))])))
   (loop 0 x0 y0))
 
+(define (run)
+  (mandel -1.8 -1.2  0.7 1.2  200 200 25))
+
 
 (send w show #t)
-(mandel -2 -1.2  0.7 1.2  200 200 25)
-;; when run standalone, the whole vm exits here
+(run)
+(yield evs)
