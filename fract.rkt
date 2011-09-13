@@ -2,9 +2,19 @@
 (require racket/gui/base)
 (require racket/draw)
 
-(define w (new frame% [label "FOO"] [width 200][height 200]))
+(define canvas1%
+  (class canvas%
+         (define/override (on-char ev)
+           (printf "* kbd ev ~s  " (send ev get-key-code))
+           (flush-output))
+         (super-new)))
+
+(define w
+  ;; without the new eventspace window refreshing sux:
+  (parameterize ([current-eventspace (make-eventspace)])
+    (new frame% [label "FOO"] [width 200][height 200])))
 (define c
-  (new canvas% [parent w]
+  (new canvas1% [parent w]
        [paint-callback 
         (lambda (canvas dc)
           (send dc set-font (make-object font% 12 'modern
@@ -14,7 +24,6 @@
           )]))
 (send c set-canvas-background
       (send the-color-database find-color "black"))
-(send w show #t)
 (define dc (send c get-dc)) ; further drawing is possible!
 
 (define (mandel x0 y0  x1 y1  xp yp  iters)
@@ -24,7 +33,7 @@
         ((>= xi xp))
       (do ([y y0 (+ y dy)] [yi 0 (add1 yi)])
           ((>= yi yp))
-        (mandel-pixel (go-mandel iters x y) xi yi)))))
+        (mandel-pixel (calc-mandel iters x y) xi yi)))))
         
 (define color-tab '[[20 "white"]
                     [10 "yellow"]
@@ -41,7 +50,7 @@
   (send dc set-pen color 1 'solid)
   (send dc draw-point xi yi))
   
-(define (go-mandel maxiter x0 y0)
+(define (calc-mandel maxiter x0 y0)
   (define (loop i x y)
     (let ([x2 (* x x)] [y2 (* y y)])
       (cond
@@ -53,4 +62,7 @@
           (loop (add1 i) nx ny))])))
   (loop 0 x0 y0))
 
-(mandel -2 -1.2  0.7 1.2  200 200 30)
+
+(send w show #t)
+(mandel -2 -1.2  0.7 1.2  200 200 25)
+;; when run standalone, the whole vm exits here
