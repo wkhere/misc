@@ -20,6 +20,7 @@ soe/main
 *.o
 *.beam
 *.core
+*.[PES]
 *.hi
 *.cm[iox]
 *.ozf
