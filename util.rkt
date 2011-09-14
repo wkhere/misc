@@ -1,9 +1,12 @@
 #lang racket
 (provide (all-defined-out))
 
-(define (id x) x)
+;; the usual idiom seems to be (values x)
+;; there is also (identity) in racket/function
+;;(define (id x) x)
 
 
+;; interpose is redundant with builtin add-between
 (define (interpose sep xs)
   (reverse (r-interpose sep xs empty)))
 
@@ -19,7 +22,7 @@
 
 (define (take-while pred? xs 
                     #:acc-reversed? [acc-reversed? #f])
-  (let ([acc-transform (if acc-reversed? id reverse)])
+  (let ([acc-transform (if acc-reversed? identity reverse)])
     (let/ec ret
       (foldl (lambda (x acc)
                (if (pred? x)
@@ -33,7 +36,7 @@
 
 (define (split-with pred? xs 
                     #:acc-reversed? [acc-reversed? #f])
-  (let ([acc-transform (if acc-reversed? id reverse)])
+  (let ([acc-transform (if acc-reversed? identity reverse)])
     (define iter 
       (match-lambda*
        [(list acc1 (list* y ys))
