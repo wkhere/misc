@@ -1,5 +1,8 @@
 ;; -*- LFE -*-
-;; macrology only, so can be included before module definition
+;; macros only, so can be included before module definition
+;;
+;; (c) 2009, 2011 Wojciech Kaczmarek <wojtekk@kofeina.net>
+;; This file is resurrected from my experiments in late summer of 2009.
 
 ;; macro-building bits
 
