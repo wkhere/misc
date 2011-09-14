@@ -1,3 +1,7 @@
+(* example how to run bytecode version without findlib, makefiles etc: 
+   ocaml graphics.cma unix.cma mygfx.cmo fract.ml -size 300 300 -tc 9 -it 20
+*)
+
 open Mygfx;;
 
 let colorTab = [20, G.white;
