@@ -7,10 +7,13 @@ gtktest
 thrill
 hs2erl
 lf_test
+lf_test_hs
+lf_test_ml
+lf_test_ml.opt
 soe/main
 
 # data
-*.ets
+*.[de]ts
 *.dets
 
 # compilation byproducts
@@ -21,3 +24,5 @@ soe/main
 *.cm[iox]
 *.ozf
 *.alc
+compiled/
+._d/
