@@ -1,6 +1,7 @@
 #lang racket
 (require racket/gui/base)
 (require racket/draw)
+(require racket/flonum)
 
 (define canvas1%
   (class canvas%
@@ -28,11 +29,11 @@
 (define dc (send c get-dc)) ; further drawing is possible!
 
 (define (mandel x0 y0  x1 y1  xp yp  iters)
-  (let ([dx (/ (- x1 x0) xp)]
-        [dy (/ (- y1 y0) yp)])
-    (do ([x x0 (+ x dx)] [xi 0 (add1 xi)])
+  (let ([dx (fl/ (fl- x1 x0) (->fl xp))]
+        [dy (fl/ (fl- y1 y0) (->fl yp))])
+    (do ([x x0 (fl+ x dx)] [xi 0 (add1 xi)])
         ((>= xi xp))
-      (do ([y y0 (+ y dy)] [yi 0 (add1 yi)])
+      (do ([y y0 (fl+ y dy)] [yi 0 (add1 yi)])
           ((>= yi yp))
         (mandel-pixel (calc-mandel iters x y) xi yi)))))
         
@@ -53,13 +54,13 @@
   
 (define (calc-mandel maxiter x0 y0)
   (define (loop i x y)
-    (let ([x2 (* x x)] [y2 (* y y)])
+    (let ([x2 (fl* x x)] [y2 (fl* y y)])
       (cond
-       [(>= (+ x2 y2) 4)  i]
+       [(fl>= (fl+ x2 y2) 4.0)  i]
        [(>= i maxiter)  'in-set]
        [else
-        (let ([ny (+ (* 2 x y) y0)]
-              [nx (+ x2 (- y2) x0)])
+        (let ([ny (fl+ (fl* 2.0 (fl* x y)) y0)]
+              [nx (fl+ (fl- x2 y2) x0)])
           (loop (add1 i) nx ny))])))
   (loop 0 x0 y0))
 
