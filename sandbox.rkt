@@ -17,8 +17,11 @@
 
 ;; restartable exceptions:
 
+(define-syntax-rule (values->list vs)
+  (call-with-values (lambda () vs) list))
+
 (define (use-restarts e . restarts)
-  (match (let/cc k (raise (list e k)))
+  (match (values->list (let/cc k (raise (list e k))))
          [(list* case args)
           (apply (cadr (assoc case restarts)) args)]))
 
@@ -43,9 +46,9 @@
        (case (read)
          [(use-other)
           (begin (printf "Enter value to use: ")
-                 (restart-k `(use-value ,(read))))]
+                 (restart-k 'use-value (read)))]
          [(skip)
-          (restart-k '[skip])]
+          (restart-k 'skip)]
          [else (raise e)])])])
    (this-example-will-raise-exception)))
 
