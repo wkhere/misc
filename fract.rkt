@@ -10,13 +10,13 @@
            (flush-output))
          (super-new)))
 
-(define evs (make-eventspace))
-(define w
+(define *evs* (make-eventspace))
+(define *w*
   ;; without the new eventspace window refreshing sux:
-  (parameterize ([current-eventspace evs])
+  (parameterize ([current-eventspace *evs*])
     (new frame% [label "FOO"] [width 200][height 200])))
-(define c
-  (new canvas1% [parent w]
+(define *c*
+  (new canvas1% [parent *w*]
        [paint-callback 
         (lambda (canvas dc)
           (send dc set-font (make-object font% 12 'modern
@@ -24,9 +24,9 @@
           (send dc set-text-foreground (make-object color% 240 240 240))
           (send dc draw-text "Mandelbrot !!" 2 2)
           )]))
-(send c set-canvas-background
+(send *c* set-canvas-background
       (send the-color-database find-color "black"))
-(define dc (send c get-dc)) ; further drawing is possible!
+(define *dc* (send *c* get-dc)) ; further drawing is possible!
 
 (define (mandel x0 y0  x1 y1  xp yp  iters)
   (let ([dx (fl/ (fl- x1 x0) (->fl xp))]
@@ -37,20 +37,20 @@
           ((>= yi yp))
         (mandel-pixel (calc-mandel iters x y) xi yi)))))
         
-(define color-tab '[[20 "white"]
-                    [10 "yellow"]
-                    [ 8 "green"]
-                    [ 6 "cyan"]
-                    [ 5 "red"]
-                    [ 3 "magenta"]
-                    [-1 "blue"]])
+(define +color-tab+ '[[20 "white"]
+                      [10 "yellow"]
+                      [ 8 "green"]
+                      [ 6 "cyan"]
+                      [ 5 "red"]
+                      [ 3 "magenta"]
+                      [-1 "blue"]])
 (define (mandel-pixel fractality xi yi)
   (define color
     (if (eq? fractality 'in-set)
         "black"
-        (second (findf (lambda (kv) (>= fractality (first kv))) color-tab))))
-  (send dc set-pen color 1 'solid)
-  (send dc draw-point xi yi))
+        (second (findf (lambda (kv) (>= fractality (first kv))) +color-tab+))))
+  (send *dc* set-pen color 1 'solid)
+  (send *dc* draw-point xi yi))
   
 (define (calc-mandel maxiter x0 y0)
   (define (loop i x y)
@@ -68,6 +68,6 @@
   (mandel -1.8 -1.2  0.7 1.2  200 200 25))
 
 
-(send w show #t)
+(send *w* show #t)
 (run)
-(yield evs)
+(yield *evs*)
