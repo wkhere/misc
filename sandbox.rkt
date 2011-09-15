@@ -29,7 +29,7 @@
   (for/fold ([acc empty])
             ([x (in-range -5 5)])
     (with-handlers
-     ([exn?
+     ([exn:fail?
        (lambda (e)
          (use-restarts e `[skip ,(lambda () acc)]
                          `[use-value ,(lambda (v) (cons v acc))]))])
