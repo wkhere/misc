@@ -20,6 +20,17 @@
           acc]))
 
 
+(define (zip xs ys) (map list xs ys))
+
+(define (unzip xs) ; unzips list of 2-element lists
+  (let-values ([(ys zs)
+                (for/fold ([ys empty]
+                           [zs empty])
+                          ([x xs])
+                          (values  (cons (car x) ys)  (cons (cadr x) zs)))])
+    (list (reverse ys) (reverse zs))))
+
+
 (define (take-while pred? xs 
                     #:acc-reversed? [acc-reversed? #f])
   (let ([acc-transform (if acc-reversed? identity reverse)])
