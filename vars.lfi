@@ -1,0 +1,8 @@
+;; -*- LFE -*-
+(include-file "tools.lfi")
+
+(defmacro defvar (x v) `(: vars def ',x ,v))
+(defmacro setvar (x v) `(: vars set ',x ,v))
+(defmacro getvar (x) `(: vars get ',x))
+(defmacro show-vars () `(: vars show))
+(synonym $ getvar)
