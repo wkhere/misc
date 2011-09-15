@@ -1,7 +1,7 @@
-#lang racket
-(require racket/gui/base)
-(require racket/draw)
+#lang racket/base
+(require racket/list racket/class)
 (require racket/flonum)
+(require racket/gui/base racket/draw)
 
 (define canvas1%
   (class canvas%
