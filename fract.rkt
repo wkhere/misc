@@ -1,4 +1,5 @@
-#lang racket
+#lang racket/base
+(require racket/list racket/class)
 (require racket/flonum)
 (require racket/gui/base)
 
