@@ -53,7 +53,7 @@
   (send *dc* draw-point xi yi))
   
 (define (calc-mandel maxiter x0 y0)
-  (define (loop i x y)
+  (let loop ([i 0] [x x0] [y y0])
     (let ([x2 (fl* x x)] [y2 (fl* y y)])
       (cond
        [(fl>= (fl+ x2 y2) 4.0)  i]
@@ -61,8 +61,7 @@
        [else
         (let ([ny (fl+ (fl* 2.0 (fl* x y)) y0)]
               [nx (fl+ (fl- x2 y2) x0)])
-          (loop (add1 i) nx ny))])))
-  (loop 0 x0 y0))
+          (loop (add1 i) nx ny))]))))
 
 (define (run)
   (mandel -1.8 -1.2  0.7 1.2  200 200 25))
