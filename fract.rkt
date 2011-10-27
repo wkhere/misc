@@ -9,7 +9,8 @@
            (printf "* kbd ev ~s  " (send ev get-key-code))
            (flush-output))
          (define/override (on-event ev)
-           (printf "* mouse ev ~s  " (send ev get-event-type))
+           ;;(printf "* mouse ev ~s  " (send ev get-event-type))
+           ;; well on uran there's no motion ev, why?
            (flush-output))
          (super-new)))
 
