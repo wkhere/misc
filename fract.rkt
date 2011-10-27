@@ -3,11 +3,19 @@
 (require racket/flonum)
 (require racket/gui/base)
 
+(define *last-key* #f)
+
 (define canvas1%
   (class canvas%
          (define/override (on-char ev)
-           (printf "* kbd ev ~s  " (send ev get-key-code))
-           (flush-output))
+           (let ([key (send ev get-key-code)])
+             (unless (eq? 'release key)
+                     (set! *last-key* key))
+             ;; todo: save modifiers as well
+             (printf "* kbd ev ~s  " key)
+             (flush-output)
+             (when (eq? #\q key)
+                   (send *w* show #f))))
          (define/override (on-event ev)
            ;;(printf "* mouse ev ~s  " (send ev get-event-type))
            ;; well on uran there's no motion ev, why?
