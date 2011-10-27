@@ -48,13 +48,14 @@
                       [ 5 "red"]
                       [ 3 "magenta"]
                       [-1 "blue"]])
-(define (mandel-pixel fractality xi yi)
+
+(define (mandel-pixel fractality xi yi [dc *dc*])
   (define color
     (if (eq? fractality 'in-set)
         "black"
         (second (findf (lambda (kv) (>= fractality (first kv))) +color-tab+))))
-  (send *dc* set-pen color 1 'solid)
-  (send *dc* draw-point xi yi))
+  (send dc set-pen color 1 'solid)
+  (send dc draw-point xi yi))
   
 (define (calc-mandel maxiter x0 y0)
   (let loop ([i 0] [x x0] [y y0])
