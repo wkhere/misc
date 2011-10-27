@@ -84,3 +84,17 @@
           (set! fail fail-save)
           fail-save)))]))
 
+
+;; "objects are poor man's closures" ;)
+
+(define (mk-foo)
+  (define ns (make-empty-namespace))
+  (parameterize ([current-namespace ns])
+    (define (bar) 42)
+    (namespace-set-variable-value! 'bar bar)
+    (define (quux) 23)
+    (namespace-set-variable-value! 'quux quux) ; automate by macro
+    )
+  (define (dispatch name . args)
+    (apply (namespace-variable-value name #f #f ns) args))
+  dispatch)
