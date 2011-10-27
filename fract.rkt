@@ -40,6 +40,8 @@
       (do ([y y0 (fl+ y dy)] [yi 0 (add1 yi)])
           ((>= yi yp))
         (mandel-pixel (calc-mandel iters x y) xi yi)))))
+;; todo: replace the above by-hand scaling by the transform matrix,
+;; then compare speed
         
 (define +color-tab+ '[[20 "white"]
                       [10 "yellow"]
@@ -56,7 +58,8 @@
         (second (findf (lambda (kv) (>= fractality (first kv))) +color-tab+))))
   (send dc set-pen color 0 'solid)
   (send dc draw-point xi yi))
-  
+;; check if directly calling the-pen-list would be faster
+
 (define (calc-mandel maxiter x0 y0)
   (let loop ([i 0] [x x0] [y y0])
     (let ([x2 (fl* x x)] [y2 (fl* y y)])
