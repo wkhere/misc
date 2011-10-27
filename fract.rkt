@@ -54,7 +54,7 @@
     (if (eq? fractality 'in-set)
         "black"
         (second (findf (lambda (kv) (>= fractality (first kv))) +color-tab+))))
-  (send dc set-pen color 1 'solid)
+  (send dc set-pen color 0 'solid)
   (send dc draw-point xi yi))
   
 (define (calc-mandel maxiter x0 y0)
@@ -71,7 +71,24 @@
 (define (run)
   (mandel -1.8 -1.2  0.7 1.2  200 200 25))
 
+(define (test-penwidth0 [dc *dc*])
+  ;; pen of width 0 should draw exactly 1 pixel regardless of scale
+  ;; let's test it on different architectures:
+  ;; i686 ubuntu 11.10 (uran)     OK
+  ;; i686 archlinux    (moon)     ?
+  ;; powerpc osx 10.4  (vault)    ?
+  ;; i686 winxp        (tank)     ?
+  ;; ...
+  ;; YEAH WELL this is backed by the documentation!
+  (send dc set-scale 4 4)
+  (send dc set-brush "" 'transparent)
+  (send dc set-pen "white" 0 'solid)
+  (send dc draw-point 10 10)
+  (send dc draw-point 10 11)
+  (send dc draw-point 10 12)
+  (send dc draw-rectangle 20 5 30 15)
+)
 
 (send *w* show #t)
 (run)
-(yield *evs*)
+;;(yield *evs*)
