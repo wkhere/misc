@@ -8,6 +8,9 @@
          (define/override (on-char ev)
            (printf "* kbd ev ~s  " (send ev get-key-code))
            (flush-output))
+         (define/override (on-event ev)
+           (printf "* mouse ev ~s  " (send ev get-event-type))
+           (flush-output))
          (super-new)))
 
 (define *evs* (make-eventspace))
