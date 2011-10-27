@@ -75,9 +75,9 @@
        [(fl>= (fl+ x2 y2) 4.0)  i]
        [(>= i maxiter)  'in-set]
        [else
-        (let ([ny (fl+ (fl* 2.0 (fl* x y)) y0)]
-              [nx (fl+ (fl- x2 y2) x0)])
-          (loop (add1 i) nx ny))]))))
+        (loop (add1 i)
+              (fl+ (fl- x2 y2) x0)
+              (fl+ (fl* 2.0 (fl* x y)) y0) )]))))
 
 (define (run)
   (mandel -1.8 -1.2  0.7 1.2  200 200 25))
