@@ -1,0 +1,7 @@
+whoami = frk.
+mylove = ane.
+
+loves(X,Y) ?=> X=frk,Y=ane.
+
+loves(A,B) ?=> A=marcin,B=justyna.
+
