@@ -51,4 +51,24 @@ defmodule Sandbox do
     :ok
   end
 
+  def tailcall_canon(0), do: :zero
+  def tailcall_canon(n) do
+    tailcall_canon(n-1)
+  end
+
+  def tailcall_no_way(0), do: 0
+  def tailcall_no_way(n) do
+    1+tailcall_no_way(n-1)
+  end
+
+  def tailcall_if(0), do: 0
+  def tailcall_if(n) do
+    if n > 5 do
+      :over5
+    else
+      tailcall_if(n-1)
+      # ^ disasm shows this is a tailcall
+    end
+  end
+
 end
