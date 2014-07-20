@@ -72,9 +72,3 @@ defmodule Sandbox do
   end
 
 end
-
-
-# idea:
-#   measure some parallelization with a heavy stuff like Ackermann,
-#   one using simple :rpc.pmap and the other using explicit loop
-#   w/ :erlang.system_info(logical_processors)
