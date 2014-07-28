@@ -1,8 +1,8 @@
-import System (getArgs)
+import System.Environment (getArgs)
 import System.IO
 import Control.Monad (when)
 import Text.Printf (printf)
-import Char (ord, chr)
+import Data.Char (ord, chr)
 import Data.Bits (xor)
 
 test :: Integer -> Handle -> IO ()

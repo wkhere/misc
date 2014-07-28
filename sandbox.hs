@@ -1,4 +1,3 @@
-{-# OPTIONS -fglasgow-exts #-}
 module Sandbox where
 
 import System.IO
@@ -15,8 +14,8 @@ import Control.Concurrent.STM.TVar
 import Control.Concurrent.STM.TMVar
 import Test.QuickCheck
 
-{- IO () tests here can be run from ghci or compiled using:
-   ghc --make  -fforce-recomp -main-is Sandbox.<func> <src>
+{- testZZ::IO() functions here can be run from ghci or compiled using:
+   ghc -main-is Sandbox.<func> <src>
  -}
 
 ack :: Int->Int->Int
@@ -120,7 +119,7 @@ testTime2 = do
            print (t0, t1, t2, t0==t1, t0==t2)
 
 
-data Foo a = Foo | Bar a
+data Foo0 a = Foo0 | Bar a
              deriving (Show)
                                                                                
 
