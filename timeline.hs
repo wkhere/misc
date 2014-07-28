@@ -10,11 +10,13 @@ p = do
   dateS <- manyTill (noneOf ":") (char ':')
   skipMany $ oneOf " \t"
   t11 <- count 2 digit
-  _ <- char ':'
+  char ':'
   t12 <- count 2 digit
+  spaces
   char '-'
+  spaces
   t21 <- count 2 digit 
-  _ <- char ':'
+  char ':'
   t22 <- count 2 digit 
   char '=' <|> space <|> eot
   return $ concat [dateS, ": ", t11, ":", t12, "-", t21, ":", t22, " = ", 
